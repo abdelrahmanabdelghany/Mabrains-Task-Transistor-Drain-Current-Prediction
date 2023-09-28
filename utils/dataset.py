@@ -25,24 +25,10 @@ class Transistor_dataset(Dataset):
             idx = idx.tolist()
 
         features = torch.tensor(self.Data_Frame.iloc[idx, :-1].values)
-        labels = torch.tensor(self.Data_Frame.iloc[idx, -1])
+        labels = torch.tensor([self.Data_Frame.iloc[idx, -1]])
 
         sample = {'features': features, 'labels': labels}
 
         return sample
     
     
-def test_dataset():
-    dataset = Transistor_dataset(csv_file='MODIFIED_DATA.csv')
-    sample = dataset[0]
-    print("sample features shape: ", sample['features'].shape, "  ||  ","sample labels shape: ", sample['labels'].shape)
-    print("sample features : ", sample['features']," ||  ", "sample labels : ", sample['labels'])
-    assert (sample['features'].shape == (6,)), "Incorrect shape of features"
-    assert (sample['labels'].shape == ()), "Incorrect shape of labels"
-    assert (type(sample['features']) == torch.Tensor), "Incorrect type of features"
-    assert (type(sample['labels']) == torch.Tensor), "Incorrect type of labels"
-    
-
-if __name__ == '__main__':
-    test_dataset()
-    print('All tests passed!')

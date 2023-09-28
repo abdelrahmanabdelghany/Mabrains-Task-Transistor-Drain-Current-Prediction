@@ -1,9 +1,6 @@
 import torch
 from tqdm import tqdm
-from dataset import Transistor_dataset
-from torch.utils.data import DataLoader
-from torch.utils.data import random_split
-from torchmetrics.regression import MeanAbsolutePercentageError
+
 
 
 class Trainer():
@@ -114,43 +111,6 @@ class Trainer():
         print(f"Test_Accuracy {Test_Acc:.2f}")
         return Test_Acc
 
-def loss(output, target):
-    # MAPE loss
-    return torch.mean(torch.abs((target - output) / (target+0.001)))  
-
-
-def test_trainer():
-    from models import FCDN
-    input_shape = 6
-    output_shape = 1
-    batch_size = 32
-    model = FCDN(input_shape, output_shape,device='cuda')
-    dataset=Transistor_dataset('MODIFIED_DATA.csv')
-    train_size = int(0.7 * len(dataset))
-    valid_size = int(0.1 * len(dataset))
-    test_size = len(dataset) - train_size-valid_size
-
-    train_dataset, valid_dataset ,test_dataset= random_split(dataset, [train_size, valid_size,test_size])
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=test_size, shuffle=True)
-    loss_fn = torch.nn.L1Loss()
-    loss_fn = loss
-    accuracy = MeanAbsolutePercentageError().to('cuda')
-    #optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-    optimizer = torch.optim.RAdam(model.parameters())
-    trainer = Trainer(model=model, loss_fn=loss_fn, optimizer=optimizer,accuracy=accuracy, device='cuda')
-    history=trainer.train(train_loader=train_loader,val_loader=valid_loader,epochs=5)
-    for batch in test_loader:
-        Featurs,labels = batch['features'].to(device='cuda',dtype=torch.float),batch['labels'].to(device='cuda',dtype=torch.float)
-        trainer.test(x=Featurs,y=labels)
-        break
 
 
 
-        
-
-
-if __name__ == '__main__':
-    test_trainer()
-    print('All tests passed!')

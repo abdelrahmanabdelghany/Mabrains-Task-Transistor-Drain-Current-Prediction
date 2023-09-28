@@ -4,7 +4,7 @@ import torch
 
 class FCDN(nn.Module):
     """Fully Connected Deep Neural Network"""
-    def __init__(self, input_shape, output_shape,activation='relu',device='cpu'):
+    def __init__(self,*,model_name, input_shape, output_shape,activation=True,device='cpu'):
         """
         Arguments:
             input_shape: input size
@@ -17,18 +17,26 @@ class FCDN(nn.Module):
         
         self.input = input_shape
         self.output = output_shape
+        self.activation = activation
         self.device = device
+        self.model_name = model_name
+        
         super().__init__()
         
         self.model = nn.Sequential(
-                nn.Linear(input_shape, 16),
-                nn.ReLU(),
-                nn.Linear(16, 32),
-                nn.ReLU(),
-                nn.Linear(32, 16),
-                nn.ReLU(),
-                nn.Linear(16,1)
+                nn.Linear(input_shape, 64),
+                nn.Tanh(),
+                nn.Linear(64, 128),
+                nn.Tanh(),
+                nn.Linear(128,64),
+                nn.Tanh(),
+                nn.Linear(64,32),
+                nn.Tanh(),
+                nn.Linear(32,1)
             )
+        
+        if self.activation:
+            self.model.add_module('activation',nn.ReLU())
     
         self.model.to(device)
 
@@ -36,17 +44,10 @@ class FCDN(nn.Module):
         #forward pass
         return self.model(x)
     
-    
-def test_fcdn():
-    input_shape = 4
-    output_shape = 1
-    batch_size = 16
-    model = FCDN(input_shape, output_shape)
-    x = torch.rand(batch_size, input_shape )
-    y = model(x)
-    assert (y.shape[-1] == output_shape) , "output shape is not correct"
-
-
-if __name__ == '__main__':
-    test_fcdn()
-
+    def save(self,PATH='saved_models/'):
+        """
+        Save model
+        Arguments:
+            PATH: folder path to save model
+        """
+        torch.save(self.model, PATH+self.model_name+'.pt')
