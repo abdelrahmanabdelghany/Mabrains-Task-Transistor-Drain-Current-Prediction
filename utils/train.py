@@ -86,6 +86,8 @@ class Trainer():
         """
         print("Training Started")
         best_val_loss=float('inf')
+        patience = 2
+        triggertimes = 0
         num_train_batches=len(train_loader)
         num_val_batches=len(val_loader)
         history={
@@ -135,8 +137,20 @@ class Trainer():
             print(f"Epoch {epoch} Val_Loss {Epoch_Val_Loss:.2f}")
 
             if Epoch_Val_Loss<best_val_loss:
+                print('trigger times: 0')
+                triggertimes = 0
                 best_val_loss=Epoch_Val_Loss
                 self.model.save()
+
+            
+            if Epoch_Val_Loss > best_val_loss:
+                triggertimes += 1
+                print('Trigger Times:', triggertimes)
+
+            if triggertimes >= patience:
+                print('Early stopping!')
+                return history
+
 
         print("Training Completed")
         return history
