@@ -7,7 +7,10 @@ class Trainer():
     """Class to handle training of a model."""
 
     def __init__(self,*, model, loss_fn, optimizer,accuracy, device):
+
         """
+        Class to handle training of a model.
+
         Arguments:
             model: model to be trained
             loss_fn: loss function
@@ -26,6 +29,17 @@ class Trainer():
 
 
     def  _train_step(self, *, x, y):
+        """
+        Performs a single training step.
+
+        Arguments:
+            x: batch of features
+            y: batch of labels
+        Returns:
+            loss: loss value
+            accuracy: accuracy value
+
+        """
         Featurs=x.to(self.device,dtype=torch.float)
         Labels=y.to(self.device,dtype=torch.float)
         self.optimizer.zero_grad()
@@ -38,6 +52,17 @@ class Trainer():
     
 
     def _val_step(self, *, x, y):
+        """
+        performs a single validation step.
+
+        Arguments:
+            x: batch of features
+            y: batch of labels
+        Returns:
+            loss: loss value
+            accuracy: accuracy value
+
+        """
         Featurs=x.to(self.device,dtype=torch.float)
         Labels=y.to(self.device,dtype=torch.float)
         self.model.eval()
@@ -49,7 +74,18 @@ class Trainer():
         
     
     def train(self,*,train_loader,val_loader,epochs):
+        """
+        Trains the model.
+        Arguments:
+            train_loader: data loader for training
+            val_loader: data loader for validation
+            epochs: number of epochs to train the model
+        Returns:
+            history: dictionary containing the loss and accuracy values for each epoch.
+
+        """
         print("Training Started")
+        best_val_loss=float('inf')
         num_train_batches=len(train_loader)
         num_val_batches=len(val_loader)
         history={
@@ -72,7 +108,7 @@ class Trainer():
                 Epoch_Train_Loss+=Train_Loss
                 Epoch_Train_Acc+=Train_Acc
                 if(i%30==0):
-                    t.set_description(f"epoch {epoch} batch_loss {Train_Loss:.2f} batch_acc {Train_Acc:.2f}")
+                    t.set_description(f"epoch {epoch} batch_loss {Train_Loss:.2f}")
                 i+=1
 
 
@@ -83,7 +119,7 @@ class Trainer():
             history["train_loss"].append(Epoch_Train_Loss)
             history["train_acc"].append(Epoch_Train_Acc)
 
-            print(f"Epoch {epoch} Train_Loss {Epoch_Train_Loss:.2f} Train_Accuracy {Epoch_Train_Acc:.2f}")
+            print(f"Epoch {epoch} Train_Loss {Epoch_Train_Loss:.2f}")
 
             for batch in tqdm(val_loader):
                 Featurs,labels = batch['features'],batch['labels']
@@ -96,20 +132,34 @@ class Trainer():
             history["val_loss"].append(Epoch_Val_Loss)
             history["val_acc"].append(Epoch_Val_Acc)
 
-            print(f"Epoch {epoch} Val_Loss {Epoch_Val_Loss:.2f} Val_Accuracy {Epoch_Val_Acc:.2f}")
-           
+            print(f"Epoch {epoch} Val_Loss {Epoch_Val_Loss:.2f}")
+
+            if Epoch_Val_Loss<best_val_loss:
+                best_val_loss=Epoch_Val_Loss
+                self.model.save()
+
         print("Training Completed")
         return history
     
     
-    def  test(self,*,x,y):
+    def test(self,*,x,y):
+        """
+        Tests the model.
+
+        Arguments:
+            x: batch of features
+            y: batch of labels
+        Returns:
+            y_pred: predictions of the model on the given batch of features.
+
+        """
         self.model.eval()
         x = x.to(self.device,dtype=torch.float)
         y = y.to(self.device,dtype=torch.float)
         y_pred = self.model(x)
         Test_Acc=self.accuracy(y_pred,y)
         print(f"Test_Accuracy {Test_Acc:.2f}")
-        return Test_Acc
+        return y_pred
 
 
 
