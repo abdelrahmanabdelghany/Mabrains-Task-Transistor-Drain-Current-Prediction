@@ -82,3 +82,16 @@ def visualize_data(y_pred,labels):
     plt.legend()
     plt.show()
 
+def marginal_acc(y_pred,labels,margin=0.05):
+    """
+    Calculates marginal accuracy.
+
+    Arguments:
+        y_pred: predicted values
+        labels: actual values
+        margin: margin to be considered.
+
+    Returns:
+        Marginal accuracy.
+    """
+    return torch.mean(torch.abs((y_pred-labels)/labels)<margin)
