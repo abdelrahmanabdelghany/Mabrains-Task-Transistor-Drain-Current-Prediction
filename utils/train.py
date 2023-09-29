@@ -87,8 +87,9 @@ class Trainer():
         """
         print("Training Started")
         best_val_loss=float('inf')
-        patience = 2
+        patience = 3
         triggertimes = 0
+        last_val_loss=float('inf')
         num_train_batches=len(train_loader)
         num_val_batches=len(val_loader)
         history={
@@ -111,7 +112,7 @@ class Trainer():
                 Epoch_Train_Loss+=Train_Loss
                 Epoch_Train_Acc+=Train_Acc
                 if(i%30==0):
-                    t.set_description(f"epoch {epoch} batch_loss {Train_Loss:.2f}")
+                    t.set_description(f"epoch {epoch} batch_loss {Train_Loss:.5f}")
                 i+=1
 
 
@@ -122,7 +123,7 @@ class Trainer():
             history["train_loss"].append(Epoch_Train_Loss)
             history["train_acc"].append(Epoch_Train_Acc)
 
-            print(f"Epoch {epoch} Train_Loss {Epoch_Train_Loss:.2f}")
+            print(f"Epoch {epoch} Train_Loss {Epoch_Train_Loss:.5f}")
             if  self.scheduler is not None:
                 before_lr = self.optimizer.param_groups[0]["lr"]
                 self.scheduler.step()
@@ -140,8 +141,8 @@ class Trainer():
             history["val_loss"].append(Epoch_Val_Loss)
             history["val_acc"].append(Epoch_Val_Acc)
 
-            print(f"Epoch {epoch} Val_Loss {Epoch_Val_Loss:.2f}")
-
+            print(f"Epoch {epoch} Val_Loss {Epoch_Val_Loss:.5f}")
+            
             if Epoch_Val_Loss<best_val_loss:
                 print('trigger times: 0')
                 triggertimes = 0
@@ -149,14 +150,19 @@ class Trainer():
                 self.model.save()
 
             
-            if Epoch_Val_Loss > best_val_loss:
+            if Epoch_Val_Loss > last_val_loss:
                 triggertimes += 1
                 print('Trigger Times:', triggertimes)
+            else:
+                print('trigger times: 0')
+                triggertimes = 0
+
 
             if triggertimes >= patience:
                 print('Early stopping!')
                 return history
-
+            
+            last_val_loss=Epoch_Val_Loss
 
         print("Training Completed")
         return history
