@@ -43,9 +43,36 @@ class FCDN(nn.Module):
                 self.activation,
                 nn.Linear(16,output_shape)
             )
-
-    
+        
+        self.init_weights()
         self.model.to(device)
+    
+    def _init_weights(self,layer):
+        """
+        Initialize weights.
+
+        Arguments:
+            layer: layer
+        Returns:
+            None
+        """
+        if isinstance(layer, nn.Linear):
+            torch.nn.init.xavier_uniform(layer.weight)
+            layer.bias.data.fill_(0.01)
+
+    def init_weights(self):
+        """
+        Initialize weights.
+
+        Arguments:
+            None
+        Returns:
+            None
+        """
+        self.model.apply(self._init_weights)
+
+
+
 
     def forward(self, x):
         #forward pass
