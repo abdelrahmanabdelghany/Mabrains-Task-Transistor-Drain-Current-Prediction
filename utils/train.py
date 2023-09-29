@@ -6,7 +6,7 @@ from tqdm import tqdm
 class Trainer():
     """Class to handle training of a model."""
 
-    def __init__(self,*, model, loss_fn, optimizer,accuracy, device):
+    def __init__(self,*, model, loss_fn, optimizer, scheduler=None , accuracy, device):
 
         """
         Class to handle training of a model.
@@ -23,6 +23,7 @@ class Trainer():
         self.loss_fn = loss_fn
         self.optimizer = optimizer
         self.accuracy=accuracy
+        self.scheduler=scheduler
         self.device = device
 
         
@@ -122,6 +123,11 @@ class Trainer():
             history["train_acc"].append(Epoch_Train_Acc)
 
             print(f"Epoch {epoch} Train_Loss {Epoch_Train_Loss:.2f}")
+            if  self.scheduler is not None:
+                before_lr = self.optimizer.param_groups[0]["lr"]
+                self.scheduler.step()
+                after_lr = self.optimizer.param_groups[0]["lr"]
+                print("Epoch %d: lr %.4f -> %.4f" % (epoch, before_lr, after_lr))
 
             for batch in tqdm(val_loader):
                 Featurs,labels = batch['features'],batch['labels']
