@@ -189,7 +189,7 @@ class Trainer():
         x = x.to(self.device,dtype=torch.float)
         y = y.to(self.device,dtype=torch.float)
         y_pred = self.model(x)
-        Test_Acc=self.accuracy(y_pred,y)
+        Test_Acc=self.loss_fn(y_pred,y)
         print(f"Test_Accuracy {Test_Acc:.2f}")
         return y_pred
 
