@@ -6,11 +6,11 @@ from dataset import Transistor_dataset
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 from torchmetrics.regression import MeanAbsolutePercentageError
-from helpers import MAPE_loss
-from helpers import visualize_history_loss_acc
 import os
 import torch.nn as nn
-from helpers import transforms
+from helpers import train_dataset_transforms
+from helpers import visualize_history_loss_acc
+from helpers import MAPE_loss
 
 
 def test_Transistor_dataset():
@@ -18,7 +18,7 @@ def test_Transistor_dataset():
     Test Transistor_dataset class.
     
     """
-    dataset = Transistor_dataset(csv_file='MODIFIED_DATA.csv',transform=transforms)
+    dataset = Transistor_dataset(csv_file='data\Dataset_sample.csv',train_transform=train_dataset_transforms)
     sample = dataset[0]
     assert (sample['features'].shape == (6,)), "Incorrect shape of features  " +f"shape= {sample['features'].shape}"
     assert (sample['labels'].shape == (1,)), "Incorrect shape of labels  " + f"shape= {sample['labels'].shape}"
@@ -52,7 +52,7 @@ def test_Trainer():
     batch_size = 256
     epochs = 1
     model = FCDN(model_name='test_fcdn',input_shape=input_shape, output_shape=output_shape,activation=nn.ReLU(),device='cuda')
-    dataset=Transistor_dataset('Dataset_sample.csv',transform=transforms)
+    dataset=Transistor_dataset('data\Dataset_sample.csv',train_transform=train_dataset_transforms)
     train_size = int(0.8 * len(dataset))
     valid_size = int(0.15 * len(dataset))
     test_size = len(dataset) - train_size-valid_size
@@ -66,7 +66,9 @@ def test_Trainer():
     loss_fn = MAPE_loss
     accuracy = MeanAbsolutePercentageError().to('cuda')
     optimizer = torch.optim.Adam(model.parameters(),lr=1e-2)
-    trainer = Trainer(model=model, loss_fn=loss_fn, optimizer=optimizer,accuracy=accuracy, device='cuda')
+    scheduler = torch.optim.lr_scheduler.LinearLR(optimizer, start_factor=1.0, end_factor=0.5, total_iters=30)
+    trainer = Trainer(model=model, loss_fn=loss_fn, optimizer=optimizer,scheduler=scheduler,accuracy=accuracy, device='cuda')
+
     history=trainer.train(train_loader=train_loader,val_loader=valid_loader,epochs=epochs)
     for batch in test_loader:
         Featurs,labels = batch['features'].to(device='cuda',dtype=torch.float),batch['labels'].to(device='cuda',dtype=torch.float)
@@ -77,6 +79,7 @@ def test_Trainer():
     assert (os.path.exists('saved_models/test_fcdn.pth')==True) , "model not saved"
     model.load(PATH='saved_models/test_fcdn.pth')
     assert (os.path.exists('saved_models/test_fcdn.pth')==True) , "model not loaded"
+    os.remove("saved_models/test_fcdn.pth")
 
 
 def test_save_plots():
@@ -97,4 +100,8 @@ def test_save_plots():
     history['val_acc']=[1,2,3,4,5]
     visualize_history_loss_acc(history,'test_fcdn',show=False,save=True)
     assert (os.path.exists('plots/test_fcdn_loss.png')==True) , "plots not saved"
+    os.remove("plots/test_fcdn_loss.png")
+    os.remove("plots/test_fcdn_acc.png")
+
+    
 
