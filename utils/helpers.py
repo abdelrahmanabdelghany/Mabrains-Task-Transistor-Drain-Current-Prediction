@@ -2,7 +2,7 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 
-def transforms(sample):
+def train_dataset_transforms(sample):
     """
     Transforms sample.
 
@@ -12,8 +12,6 @@ def transforms(sample):
     Returns:
         transformed sample
     """
-    #shift labels to avoid division by 0 in loss function
-    sample['labels'] = sample['labels']+1
     
     return sample
 
@@ -45,6 +43,9 @@ def MAPE_loss(output, target):
     Returns:
         MAPE loss.
     """
+    output=torch.pow(10,output)
+    target=torch.pow(10,target)
+
     return torch.mean(torch.abs((target - output) / (target)))  
 
 def visualize_history_loss_acc(history, model_name="test",show=True,save=True):
@@ -94,8 +95,8 @@ def visualize_data(y_pred,labels):
         None.
     """
     t=np.arange(0,y_pred.shape[0])
-    plt.scatter(x=t,y=(y_pred-1).detach().cpu().numpy(), label='Predicted',alpha=0.5)
-    plt.scatter(x=t,y=(labels-1).detach().cpu().numpy(), label='Actual',alpha=0.5)
+    plt.scatter(x=t,y=y_pred.detach().cpu().numpy(), label='Predicted',alpha=0.5)
+    plt.scatter(x=t,y=labels.detach().cpu().numpy(), label='Actual',alpha=0.5)
     plt.legend()
     plt.show()
 
@@ -111,6 +112,6 @@ def marginal_acc(y_pred,labels,margin=0.05):
     Returns:
         Marginal accuracy.
     """
-    y_pred=10**y_pred -10
-    labels=10**labels -10
+    y_pred=10**y_pred 
+    labels=10**labels 
     return torch.mean(torch.abs((y_pred-labels)/labels)<margin)
