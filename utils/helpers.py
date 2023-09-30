@@ -17,6 +17,23 @@ def transforms(sample):
     
     return sample
 
+def test_datset_transforms(sample):
+    """
+    Transform test_dataset sample.
+
+    Arguments:
+        sample: sample to be transformed
+
+    Returns:
+        transformed sample
+    """
+    min=torch.tensor([-0.50,	0.15, 0.36,	 0.0, 0.0, 0])
+    max=torch.tensor([2.50,	8.00, 25.00, 1.8, 1.5, 4])
+    sample['features'] = (sample['features']-min)/(max-min)
+    sample['labels'] = torch.log10(sample['labels']+10)  
+    return sample     
+
+
 def MAPE_loss(output, target):
     """
     Mean absolute percentage error loss.
@@ -94,4 +111,6 @@ def marginal_acc(y_pred,labels,margin=0.05):
     Returns:
         Marginal accuracy.
     """
+    y_pred=10**y_pred -10
+    labels=10**labels -10
     return torch.mean(torch.abs((y_pred-labels)/labels)<margin)
