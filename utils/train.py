@@ -6,7 +6,7 @@ from tqdm import tqdm
 class Trainer():
     """Class to handle training of a model."""
 
-    def __init__(self,*, model, loss_fn, optimizer, scheduler=None , accuracy, device):
+    def __init__(self,*, model, loss_fn, optimizer, scheduler=None ,early_stopping=True,patience=3, accuracy, device):
 
         """
         Class to handle training of a model.
@@ -15,15 +15,22 @@ class Trainer():
             model: model to be trained
             loss_fn: loss function
             optimizer: optimizer
+            schedulaer: learning rate scheduler
+            early_stopping: whether to use early stopping
+            patience: patience for early stopping
             accuracy: accuracy metric
             device: device on which to train the model, e.g. 'cpu' or 'cuda'
+
         """
+
 
         self.model = model
         self.loss_fn = loss_fn
         self.optimizer = optimizer
         self.accuracy=accuracy
         self.scheduler=scheduler
+        self.early_stopping=early_stopping
+        self.patience=patience
         self.device = device
 
         
@@ -87,7 +94,6 @@ class Trainer():
         """
         print("Training Started")
         best_val_loss=float('inf')
-        patience = 3
         triggertimes = 0
         last_val_loss=float('inf')
         num_train_batches=len(train_loader)
@@ -149,18 +155,18 @@ class Trainer():
                 best_val_loss=Epoch_Val_Loss
                 self.model.save()
 
-            
-            if Epoch_Val_Loss > last_val_loss:
-                triggertimes += 1
-                print('Trigger Times:', triggertimes)
-            else:
-                print('trigger times: 0')
-                triggertimes = 0
+            if self.early_stopping:
+                if Epoch_Val_Loss > last_val_loss:
+                    triggertimes += 1
+                    print('Trigger Times:', triggertimes)
+                else:
+                    print('trigger times: 0')
+                    triggertimes = 0
 
 
-            if triggertimes >= patience:
-                print('Early stopping!')
-                return history
+                if triggertimes >= self.patience:
+                    print('Early stopping!')
+                    return history
             
             last_val_loss=Epoch_Val_Loss
 
