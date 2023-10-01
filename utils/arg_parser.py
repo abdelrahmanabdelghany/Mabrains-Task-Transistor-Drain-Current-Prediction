@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-def parse_arguments():
+def parse_arguments()-> object:
     """
     Parse command line arguments.
     :return: command line arguments
