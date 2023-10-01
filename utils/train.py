@@ -134,7 +134,7 @@ class Trainer():
                 before_lr = self.optimizer.param_groups[0]["lr"]
                 self.scheduler.step()
                 after_lr = self.optimizer.param_groups[0]["lr"]
-                print("Epoch %d: lr %.4f -> %.4f" % (epoch, before_lr, after_lr))
+                print("Epoch %d: lr %.6f -> %.6f" % (epoch, before_lr, after_lr))
 
             for batch in tqdm(val_loader):
                 Featurs,labels = batch['features'],batch['labels']
@@ -156,7 +156,7 @@ class Trainer():
                 self.model.save()
 
             if self.early_stopping:
-                if Epoch_Val_Loss > last_val_loss:
+                if Epoch_Val_Loss > best_val_loss:
                     triggertimes += 1
                     print('Trigger Times:', triggertimes)
                 else:
@@ -192,7 +192,3 @@ class Trainer():
         Test_Acc=self.loss_fn(y_pred,y)
         print(f"Test_Accuracy {Test_Acc:.2f}")
         return y_pred
-
-
-
-
