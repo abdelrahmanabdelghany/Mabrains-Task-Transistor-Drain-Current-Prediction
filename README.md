@@ -134,9 +134,9 @@ def MAPE_loss(output, target):
 
 
 * Loss Plot
-    ![Example Plot](plots\FCDN_LeakReLU_256_batchnorm_linear_loss.png)
+    ![Example Plot](plots/FCDN_LeakReLU_256_batchnorm_linear_loss.png)
 
 * Data Visualization gif
-    ![Example gif](animated_results\Data_visualization.gif)
+    ![Example gif](animated_results/Data_visualization.gif)
 
 
