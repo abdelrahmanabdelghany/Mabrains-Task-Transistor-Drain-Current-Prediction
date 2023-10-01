@@ -33,14 +33,19 @@ class FCDN(nn.Module):
         self.model = nn.Sequential(
                 nn.Linear(input_shape, 16),
                 self.activation,
+                nn.BatchNorm1d(16),
                 nn.Linear(16, 32),
                 self.activation,
+                nn.BatchNorm1d(32),
                 nn.Linear(32,64),
                 self.activation,
+                nn.BatchNorm1d(64),
                 nn.Linear(64,32),
                 self.activation,
+                nn.BatchNorm1d(32),
                 nn.Linear(32,16),
                 self.activation,
+                nn.BatchNorm1d(16),
                 nn.Linear(16,output_shape)
             )
         
