@@ -114,4 +114,4 @@ def marginal_acc(y_pred,labels,margin=0.05):
     """
     y_pred=10**y_pred 
     labels=10**labels 
-    return torch.mean(torch.abs((y_pred-labels)/labels)<margin)
+    return torch.mean((torch.abs((y_pred-labels)/labels)<margin).float())
