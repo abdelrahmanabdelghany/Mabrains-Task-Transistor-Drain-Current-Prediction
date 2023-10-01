@@ -17,6 +17,7 @@ Prediction of nmos transistor drain current based on nmos simulated data.
     - [Training](#training)
     - [Evaluation](#evaluation)
     - [Plots](#plots)
+  - [Inference](#inference)
 
 ## Workflow
 
@@ -33,7 +34,7 @@ Prediction of nmos transistor drain current based on nmos simulated data.
   
 
 ```python
-min=torch.tensor([-0.50,	0.15, 0.36,	 0.0, 0.0, 0])
+min=torch.tensor([-0.50, 0.15, 0.36, 0.0, 0.0, 0])
 max=torch.tensor([2.50,	8.00, 25.00, 1.8, 1.5, 4])
 sample['features'] = (sample['features']-min)/(max-min)
 sample['labels'] = torch.log10(sample['labels']+10)  
@@ -144,3 +145,11 @@ def MAPE_loss(output, target):
     ![Example gif](animated_results/Data_visualization.gif)
 
 
+## Inference
+    python inference.py --model_name FCDN_LeakReLU_256_batchnorm_linear --dataset_name test_data --device cuda
+
+    --model_name -> str model name, model wights should be saved in saved_models as model_name.pth
+    --dataset_name -> str dataset name saved in data as dataset.csv
+    --device -> str "cuda" for GPU or "cpu"
+
+    NOTE that predictions will be saved as csv file in predictions as dataset_name.csv
